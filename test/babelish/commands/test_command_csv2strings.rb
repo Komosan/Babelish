@@ -32,22 +32,6 @@ class TestCSV2StringsCommand < Test::Unit::TestCase
     system("rm -rf ./mynewlocation")
   end
 
-  def test_csv2strings_with_fetch_google_doc
-    omit if ENV['TRAVIS']
-    options = {
-      :filename => "my_strings",
-      :langs => {"English" => "en", "French" => "fr"},
-      :fetch => true
-    }
-    assert_nothing_raised do
-      Commandline.new([], options).csv2strings
-    end
-
-    # clean up
-    system("rm -rf ./en.lproj/")
-    system("rm -rf ./fr.lproj/")
-  end
-
   def test_csv2strings_with_config_file
     system("cp .babelish.sample .babelish")
 

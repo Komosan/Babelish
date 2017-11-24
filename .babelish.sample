@@ -13,12 +13,11 @@ filenames: ["test/data/test_en.strings", "test/data/test_fr.strings"]
 ###################################### CSV2Base ######################################
 
 ## required
-filename: test/data/test_data.csv    # CSV file (CSV_FILENAME) to convert from or name of file in Google Drive
+filename: test/data/test_data.csv    # CSV file (CSV_FILENAME) to convert from
 langs:                               # Languages to convert. i.e. English:en
   English: "en"
 
 ## optional
-# fetch: true                        # set to true to get file(filename) from google drive
 # excluded_states: ["Images", "Xib"] # Exclude rows with given state
 # comments_column: 4                 # Position of column for comments if any
 # state_column: 3                    # Position of column for state if any

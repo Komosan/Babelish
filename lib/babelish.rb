@@ -24,7 +24,6 @@ require "babelish/json2csv"
 
 # General
 require "babelish/language"
-require "babelish/google_doc"
 
 # iOS specific
 require "babelish/xcode_macros"

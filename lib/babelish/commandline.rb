@@ -15,7 +15,7 @@ class Commandline < Thor
 
   CSVCLASSES.each do |klass|
     desc "#{klass[:name].downcase}", "Convert CSV file to #{klass[:ext]}"
-    method_option :filename, :type => :string, :aliases => "-i", :desc => "CSV file to convert from or name of file in Google Drive"
+    method_option :filename, :type => :string, :aliases => "-i", :desc => "CSV file to convert from"
     method_option :langs, :type => :hash, :aliases => "-L", :desc => "Languages to convert. i.e. English:en"
 
     # optional options
@@ -29,8 +29,6 @@ class Commandline < Thor
     method_option :output_basenames, :type => :array, :aliases => "-o", :desc => "Basename of output files"
     method_option :stripping, :type => :boolean, :aliases => "-N", :default => false, :desc => "Strips values of spreadsheet"
     method_option :ignore_lang_path, :type => :boolean, :aliases => "-I", :lazy_default => false, :desc => "Ignore the path component of langs"
-    method_option :fetch, :type => :boolean, :desc => "Download file from Google Drive"
-    method_option :sheet, :type => :numeric, :desc => "Index of worksheet to download. First index is 0"
     if klass[:name] == "CSV2Strings"
       method_option :macros_filename, :type => :boolean, :aliases => "-m", :lazy_default => false, :desc => "Filename containing defines of localized keys"
     end
@@ -63,32 +61,14 @@ class Commandline < Thor
     end
   end
 
-  desc "csv_download", "Download Google Spreadsheet containing translations"
-  method_option :gd_filename, :type => :string, :desc => "File to download from Google Drive."
-  method_option :sheet, :type => :numeric, :desc => "Index of worksheet to download. First index is 0."
-  method_option :all, :type => :boolean, :lazy_default => true, :desc => "Download all worksheets to individual csv files."
-  method_option :output_filename, :type => :string, :desc => "Filepath of downloaded file."
-  def csv_download
-    all = options[:sheet] ? false : options[:all]
-    filename = options['gd_filename']
-    raise ArgumentError.new("csv_download command : missing file to download") unless filename
-    if all
-      download(filename)
-    else
-      download(filename, options['output_filename'], options['sheet'])
-    end
-  end
-
-  desc "open FILE", "Open local csv file in default editor or Google Spreadsheet containing translations in default browser"
+  desc "open FILE", "Open local csv file in default editor"
   def open(file = "translations.csv")
     filename = file || options["filename"]
     if File.exist?(filename)
       say "Opening local file '#{filename}'"
       system "open \"#{filename}\""
     else
-      say "Opening Google Drive file '#{filename}'"
-      gd = Babelish::GoogleDoc.new
-      gd.open filename.to_s
+      say "File not found: #{filename}"
     end
   end
 
@@ -115,34 +95,9 @@ class Commandline < Thor
   end
 
   no_tasks do
-    def download(filename, output_filename = nil, worksheet_index = nil)
-      gd = Babelish::GoogleDoc.new
-      if output_filename || worksheet_index
-        file_path = gd.download_spreadsheet filename.to_s, output_filename, worksheet_index
-        files = [file_path].compact
-      else
-        files = gd.download filename.to_s
-        file_path = files.join("\n") unless files.empty?
-      end
-
-      if file_path
-        say "File '#{filename}' downloaded to :\n#{file_path.to_s}"
-      else
-        say "Could not download the requested file: #{filename}"
-      end
-      files
-    end
-
     def csv2base(classname)
       args = options.dup
-      if options[:fetch]
-        say "Fetching csv file #{options[:filename]} from Google Drive"
-        files = download(options[:filename], nil, options[:sheet])
-        abort if files.empty? # no file downloaded
-        args.delete(:fetch)
-      else
-        files = [options[:filename]]
-      end
+      files = [options[:filename]]
       args.delete(:langs)
       args.delete(:filename)
 
